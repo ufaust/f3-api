@@ -1,0 +1,59 @@
+ARG ENV
+
+FROM php:8.2-fpm-buster
+
+RUN apt-get update && apt-get install -y \
+    gnupg \
+    wget \
+    g++ \
+    procps \
+    openssl \
+    git \
+    unzip \
+    zlib1g-dev \
+    libzip-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libicu-dev  \
+    libonig-dev \
+    libxslt1-dev \
+    acl
+
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype
+
+RUN apt install postgresql-server-dev-11 -y
+
+COPY php/config/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+RUN docker-php-ext-install \
+    pdo pdo_pgsql zip xsl gd intl opcache exif mbstring
+
+ARG ENV
+
+RUN if [ "$ENV" = "dev" ] ; then \
+        pecl install xdebug-3.2.0 && \
+        docker-php-ext-enable xdebug  \
+    ; fi
+
+COPY php/config/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
+RUN pecl install redis && docker-php-ext-enable redis
+RUN apt install npm -y
+
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+RUN composer self-update 2.5.8
+
+RUN wget --no-check-certificate https://phar.phpunit.de/phpunit-6.5.3.phar && \
+    mv phpunit*.phar phpunit.phar && \
+    chmod +x phpunit.phar && \
+    mv phpunit.phar /usr/local/bin/phpunit
+
+RUN usermod -u 1000 www-data
+RUN usermod -a -G www-data root
+RUN mkdir -p /var/www
+RUN chown -R www-data:www-data /var/www
+RUN mkdir -p /var/www/.composer
+RUN chown -R www-data:www-data /var/www/.composer
+
+WORKDIR /var/www/f3-api/

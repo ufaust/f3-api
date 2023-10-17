@@ -1,0 +1,86 @@
+version:  '3.9'
+
+services:
+  db:
+    image: postgres:11.12-alpine
+    container_name: 'f3-api.db'
+    restart: on-failure
+    cap_add:
+      - SYS_NICE
+    environment:
+      POSTGRES_DB: f3-api
+      POSTGRES_USER: f3_user
+      POSTGRES_PASSWORD: f3_pass
+    volumes:
+      - './bin/postgresql/:/var/lib/postgresql/data'
+    ports:
+      - '5432:5432'
+    networks:
+      - f3_network
+
+  php:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile-php
+      network: host
+      args:
+        ENV: dev # choose environment (dev/test/prod)
+    container_name: 'f3-api.php'
+    expose:
+      - '9000'
+    restart: on-failure
+    env_file:
+      - docker/php/.env # ! create this file ! - choose environment (dev/test/prod) and copy correct template .dist file
+    depends_on:
+      - db
+    volumes:
+      - './:/var/www/f3-api:cached'
+    networks:
+      - f3_network
+
+  nginx:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile-nginx
+    container_name: 'f3-api.nginx'
+    depends_on:
+      - db
+      - php
+    volumes:
+      - './:/var/www/f3-api/:cached'
+      - './logs/nginx:/var/log/nginx'
+    ports:
+      - '8080:80'
+    networks:
+      - f3_network
+
+  test-db:
+    image: postgres:11.12-alpine
+    container_name: 'f3-api.test-db'
+    restart: on-failure
+    cap_add:
+      - SYS_NICE
+    environment:
+      POSTGRES_DB: f3-api
+      POSTGRES_USER: f3_user
+      POSTGRES_PASSWORD: f3_pass
+    # volumes are not persisted in test db
+    ports:
+      - '8070:5432' # notice different OUT port than in default database
+    networks:
+      - f3_network
+
+  redis:
+    image: redis:latest
+    container_name: 'f3-api.redis'
+    ports:
+      - "6379:6379"
+    networks:
+      - f3_network
+
+networks:
+  f3_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.57.0/24
