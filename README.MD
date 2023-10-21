@@ -19,3 +19,6 @@ Docker and Docker compose 3.9 or higher
 ***
 ### Generate JWT Token
 `php bin/console lexik:jwt:generate-keypair`
+
+### Psalm 
+`./vendor/bin/psalm`
