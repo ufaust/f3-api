@@ -11,8 +11,11 @@ Docker and Docker compose 3.9 or higher
 ### Initialize database
 
 #### Default server address `http://localhost:8080`
-***
 
 ***
 ### Loading fixtures
 `php bin/console doctrine:fixtures:load`
+
+***
+### Generate JWT Token
+`php bin/console lexik:jwt:generate-keypair`
