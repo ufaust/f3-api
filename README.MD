@@ -22,3 +22,7 @@ Docker and Docker compose 3.9 or higher
 
 ### Psalm 
 `./vendor/bin/psalm`
+
+***
+### Api-platform
+`your-domain/api`
