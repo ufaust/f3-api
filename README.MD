@@ -3,13 +3,11 @@
 ### Requirements:
 Docker and Docker compose 3.9 or higher
 
-### Commands to run project
-- `docker-compose build`
-- `docker exec -it f3_api.php composer install`
-- `docker-compose up -d`
+### Commands to build and run project
+- `make build`
+- `make start`
+- `make install` - composer install, create DB and migrations etc.
 ***
-### Initialize database
-
 #### Default server address `http://localhost:8080`
 
 ***
@@ -18,7 +16,9 @@ Docker and Docker compose 3.9 or higher
 
 ***
 ### Generate JWT Token
-`php bin/console lexik:jwt:generate-keypair`
+`php bin/console lexik:jwt:generate-keypair`  
+
+After generation of JWT token copy `JWT_PASSPHRASE` from `project-root/.env` to `docker/php/.env` 
 
 ### Psalm 
 `./vendor/bin/psalm`
