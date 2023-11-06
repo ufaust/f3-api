@@ -59,6 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
+    #[ORM\OneToOne(mappedBy: 'owner', cascade: ['persist', 'remove'])]
+    private ?FamilyTree $familyTree = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -148,6 +151,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getFamilyTree(): ?FamilyTree
+    {
+        return $this->familyTree;
+    }
+
+    public function setFamilyTree(FamilyTree $familyTree): static
+    {
+        // set the owning side of the relation if necessary
+        if ($familyTree->getOwner() !== $this) {
+            $familyTree->setOwner($this);
+        }
+
+        $this->familyTree = $familyTree;
 
         return $this;
     }
