@@ -1,6 +1,7 @@
 install:
 	docker exec -it f3-api.php composer install
 	cp docker/php/.env.dev.dist docker/php/.env
+	cp docker/php/.env.dev.dist .env
 	docker exec -it f3-api.php php bin/console doctrine:database:create
 	docker exec -it f3-api.php php bin/console doctrine:migrations:migrate
 start:
